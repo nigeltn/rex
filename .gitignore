@@ -1,0 +1,41 @@
+# --- Build output ---
+build/
+cmake-build-*/
+out/
+Testing/
+CTestTestfile.cmake
+CMakeCache.txt
+CMakeFiles/
+compile_commands.json
+.cache/
+.clangd
+
+# --- Compiled artifacts ---
+*.o
+*.obj
+*.a
+*.so
+*.dylib
+*.exe
+
+# --- Editor / OS ---
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# --- Tooling output (regenerate, don't commit) ---
+fuzz-crashes/
+bench-results/
+*.perf.json
+*.bench.csv
+
+# --- Practice scratch space (throwaway lesson demos) ---
+practice/
+
+# --- Local planning docs (never ship in the repo) ---
+TIMELINE.md
+SPEC.md
+PLAN.md
+notes/
+CLAUDE.md
