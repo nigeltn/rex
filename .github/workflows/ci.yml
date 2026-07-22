@@ -1,0 +1,35 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: clang-format --dry-run --Werror $(git ls-files '*.cpp' '*.hpp')
+
+  build-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        cxx: [g++, clang++]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
+      - run: cmake --build build
+      - run: ctest --test-dir build --output-on-failure
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install gcovr
+      - run: cmake -B build-cov -DCMAKE_CXX_FLAGS=--coverage -DCMAKE_EXE_LINKER_FLAGS=--coverage
+      - run: cmake --build build-cov
+      - run: ctest --test-dir build-cov --output-on-failure
+      - run: gcovr --root . --filter src/ --filter include/ --fail-under-line 80 --print-summary
