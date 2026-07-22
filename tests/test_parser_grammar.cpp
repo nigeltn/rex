@@ -266,10 +266,10 @@ TEST(ParserClass, SimpleClass) {
   rex::NodePtr p = rex::parse("[abc]");
   ASSERT_NE(p, nullptr);
   EXPECT_EQ(p->kind, rex::Kind::Class);
-  EXPECT_TRUE(p->set.test('a'));
-  EXPECT_TRUE(p->set.test('b'));
-  EXPECT_TRUE(p->set.test('c'));
-  EXPECT_FALSE(p->set.test('d'));
+  EXPECT_TRUE(p->allowed_set.test('a'));
+  EXPECT_TRUE(p->allowed_set.test('b'));
+  EXPECT_TRUE(p->allowed_set.test('c'));
+  EXPECT_FALSE(p->allowed_set.test('d'));
   EXPECT_EQ(p->left, nullptr);
   EXPECT_EQ(p->right, nullptr);
 }
@@ -278,122 +278,122 @@ TEST(ParserClass, SingleCharClass) {
   rex::NodePtr p = rex::parse("[a]");
   ASSERT_NE(p, nullptr);
   EXPECT_EQ(p->kind, rex::Kind::Class);
-  EXPECT_TRUE(p->set.test('a'));
-  EXPECT_FALSE(p->set.test('b'));
+  EXPECT_TRUE(p->allowed_set.test('a'));
+  EXPECT_FALSE(p->allowed_set.test('b'));
 }
 
 TEST(ParserClass, Range) {
   rex::NodePtr p = rex::parse("[a-z]");
   ASSERT_NE(p, nullptr);
   EXPECT_EQ(p->kind, rex::Kind::Class);
-  EXPECT_TRUE(p->set.test('a'));
-  EXPECT_TRUE(p->set.test('m'));
-  EXPECT_TRUE(p->set.test('z'));
-  EXPECT_FALSE(p->set.test('A'));
-  EXPECT_FALSE(p->set.test('0'));
+  EXPECT_TRUE(p->allowed_set.test('a'));
+  EXPECT_TRUE(p->allowed_set.test('m'));
+  EXPECT_TRUE(p->allowed_set.test('z'));
+  EXPECT_FALSE(p->allowed_set.test('A'));
+  EXPECT_FALSE(p->allowed_set.test('0'));
 }
 
 TEST(ParserClass, TwoRanges) {
   rex::NodePtr p = rex::parse("[a-zA-Z]");
   ASSERT_NE(p, nullptr);
-  EXPECT_TRUE(p->set.test('q'));
-  EXPECT_TRUE(p->set.test('Q'));
-  EXPECT_FALSE(p->set.test('5'));
+  EXPECT_TRUE(p->allowed_set.test('q'));
+  EXPECT_TRUE(p->allowed_set.test('Q'));
+  EXPECT_FALSE(p->allowed_set.test('5'));
 }
 
 TEST(ParserClass, RangeAndSingles) {
   rex::NodePtr p = rex::parse("[a-cx]");
   ASSERT_NE(p, nullptr);
-  EXPECT_TRUE(p->set.test('b'));
-  EXPECT_TRUE(p->set.test('x'));
-  EXPECT_FALSE(p->set.test('d'));
+  EXPECT_TRUE(p->allowed_set.test('b'));
+  EXPECT_TRUE(p->allowed_set.test('x'));
+  EXPECT_FALSE(p->allowed_set.test('d'));
 }
 
 TEST(ParserClass, SingleCharRange) {
   rex::NodePtr p = rex::parse("[a-a]");
   ASSERT_NE(p, nullptr);
-  EXPECT_TRUE(p->set.test('a'));
-  EXPECT_FALSE(p->set.test('b'));
+  EXPECT_TRUE(p->allowed_set.test('a'));
+  EXPECT_FALSE(p->allowed_set.test('b'));
 }
 
 TEST(ParserClass, Negated) {
   rex::NodePtr p = rex::parse("[^a]");
   ASSERT_NE(p, nullptr);
   EXPECT_EQ(p->kind, rex::Kind::Class);
-  EXPECT_FALSE(p->set.test('a'));
-  EXPECT_TRUE(p->set.test('b'));
-  EXPECT_TRUE(p->set.test('^'));
+  EXPECT_FALSE(p->allowed_set.test('a'));
+  EXPECT_TRUE(p->allowed_set.test('b'));
+  EXPECT_TRUE(p->allowed_set.test('^'));
 }
 
 TEST(ParserClass, NegatedRange) {
   rex::NodePtr p = rex::parse("[^a-z]");
   ASSERT_NE(p, nullptr);
-  EXPECT_FALSE(p->set.test('m'));
-  EXPECT_TRUE(p->set.test('M'));
+  EXPECT_FALSE(p->allowed_set.test('m'));
+  EXPECT_TRUE(p->allowed_set.test('M'));
 }
 
 TEST(ParserClass, CaretNotFirstIsLiteral) {
   rex::NodePtr p = rex::parse("[a^]");
   ASSERT_NE(p, nullptr);
-  EXPECT_TRUE(p->set.test('a'));
-  EXPECT_TRUE(p->set.test('^'));
-  EXPECT_FALSE(p->set.test('b'));
+  EXPECT_TRUE(p->allowed_set.test('a'));
+  EXPECT_TRUE(p->allowed_set.test('^'));
+  EXPECT_FALSE(p->allowed_set.test('b'));
 }
 
 TEST(ParserClass, LeadingDashIsLiteral) {
   rex::NodePtr p = rex::parse("[-a]");
   ASSERT_NE(p, nullptr);
-  EXPECT_TRUE(p->set.test('-'));
-  EXPECT_TRUE(p->set.test('a'));
+  EXPECT_TRUE(p->allowed_set.test('-'));
+  EXPECT_TRUE(p->allowed_set.test('a'));
 }
 
 TEST(ParserClass, TrailingDashIsLiteral) {
   rex::NodePtr p = rex::parse("[a-]");
   ASSERT_NE(p, nullptr);
-  EXPECT_TRUE(p->set.test('-'));
-  EXPECT_TRUE(p->set.test('a'));
+  EXPECT_TRUE(p->allowed_set.test('-'));
+  EXPECT_TRUE(p->allowed_set.test('a'));
 }
 
 TEST(ParserClass, CloseBracketFirstIsLiteral) {
   rex::NodePtr p = rex::parse("[]a]");
   ASSERT_NE(p, nullptr);
   EXPECT_EQ(p->kind, rex::Kind::Class);
-  EXPECT_TRUE(p->set.test(']'));
-  EXPECT_TRUE(p->set.test('a'));
+  EXPECT_TRUE(p->allowed_set.test(']'));
+  EXPECT_TRUE(p->allowed_set.test('a'));
 }
 
 TEST(ParserClass, NegatedCloseBracketFirstIsLiteral) {
   rex::NodePtr p = rex::parse("[^]a]");
   ASSERT_NE(p, nullptr);
-  EXPECT_FALSE(p->set.test(']'));
-  EXPECT_FALSE(p->set.test('a'));
-  EXPECT_TRUE(p->set.test('b'));
+  EXPECT_FALSE(p->allowed_set.test(']'));
+  EXPECT_FALSE(p->allowed_set.test('a'));
+  EXPECT_TRUE(p->allowed_set.test('b'));
 }
 
 TEST(ParserClass, MetacharsAreLiteralInside) {
   rex::NodePtr p = rex::parse("[*+?.|()]");
   ASSERT_NE(p, nullptr);
   EXPECT_EQ(p->kind, rex::Kind::Class);
-  EXPECT_TRUE(p->set.test('*'));
-  EXPECT_TRUE(p->set.test('+'));
-  EXPECT_TRUE(p->set.test('?'));
-  EXPECT_TRUE(p->set.test('.'));
-  EXPECT_TRUE(p->set.test('|'));
-  EXPECT_TRUE(p->set.test('('));
-  EXPECT_TRUE(p->set.test(')'));
+  EXPECT_TRUE(p->allowed_set.test('*'));
+  EXPECT_TRUE(p->allowed_set.test('+'));
+  EXPECT_TRUE(p->allowed_set.test('?'));
+  EXPECT_TRUE(p->allowed_set.test('.'));
+  EXPECT_TRUE(p->allowed_set.test('|'));
+  EXPECT_TRUE(p->allowed_set.test('('));
+  EXPECT_TRUE(p->allowed_set.test(')'));
 }
 
 TEST(ParserClass, EscapedCloseBracketInside) {
   rex::NodePtr p = rex::parse("[a\\]]");
   ASSERT_NE(p, nullptr);
-  EXPECT_TRUE(p->set.test('a'));
-  EXPECT_TRUE(p->set.test(']'));
+  EXPECT_TRUE(p->allowed_set.test('a'));
+  EXPECT_TRUE(p->allowed_set.test(']'));
 }
 
 TEST(ParserClass, EscapedBackslashInside) {
   rex::NodePtr p = rex::parse("[\\\\]");
   ASSERT_NE(p, nullptr);
-  EXPECT_TRUE(p->set.test('\\'));
+  EXPECT_TRUE(p->allowed_set.test('\\'));
 }
 
 TEST(ParserClass, StarredClass) {
@@ -410,7 +410,7 @@ TEST(ParserClass, PlusOnClass) {
   EXPECT_EQ(p->kind, rex::Kind::Plus);
   ASSERT_NE(p->left, nullptr);
   EXPECT_EQ(p->left->kind, rex::Kind::Class);
-  EXPECT_TRUE(p->left->set.test('7'));
+  EXPECT_TRUE(p->left->allowed_set.test('7'));
 }
 
 TEST(ParserClass, ClassInConcat) {
@@ -481,5 +481,5 @@ TEST(ParserMix, EscapeDotClassTogether) {
   EXPECT_EQ(p->left->val, '.');
   ASSERT_NE(p->right, nullptr);
   EXPECT_EQ(p->right->kind, rex::Kind::Class);
-  EXPECT_TRUE(p->right->set.test('.'));
+  EXPECT_TRUE(p->right->allowed_set.test('.'));
 }
