@@ -24,7 +24,7 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-add_executable(rex_tests tests/test_parser.cpp)
+add_executable(rex_tests tests/test_parser.cpp tests/test_parser_grammar.cpp)
 target_link_libraries(rex_tests PRIVATE rex GTest::gtest_main)
 target_compile_options(rex_tests PRIVATE -Wall -Wextra -Werror)
 
