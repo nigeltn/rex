@@ -40,8 +40,25 @@ static NodePtr concat(std::string_view& pattern) {
   return curr;
 }
 
+static NodePtr alternation(std::string_view& pattern) {
+  NodePtr curr = concat(pattern);
+  if (curr == nullptr) {
+    return nullptr;
+  }
+  while (!pattern.empty() && pattern.front() == '|') {
+    pattern.remove_prefix(1);
+    NodePtr new_branch = concat(pattern);
+    if (new_branch == nullptr) {
+      return nullptr;
+    }
+    curr = std::make_unique<Node>(Kind::Alt, 0, std::move(curr),
+                                  std::move(new_branch));
+  }
+  return curr;
+}
+
 NodePtr parse(std::string_view pattern) {
-  NodePtr tree = concat(pattern);
+  NodePtr tree = alternation(pattern);
   if (tree == nullptr || !pattern.empty()) {
     return nullptr;
   }

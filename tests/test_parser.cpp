@@ -37,6 +37,43 @@ TEST(Parser, ThreeCharsFoldLeft) {
   EXPECT_EQ(p->right->val, 'c');
 }
 
+TEST(Parser, AltOfTwoChars) {
+  rex::NodePtr p = rex::parse("a|b");
+  ASSERT_NE(p, nullptr);
+  EXPECT_EQ(p->kind, rex::Kind::Alt);
+  ASSERT_NE(p->left, nullptr);
+  EXPECT_EQ(p->left->kind, rex::Kind::Char);
+  EXPECT_EQ(p->left->val, 'a');
+  ASSERT_NE(p->right, nullptr);
+  EXPECT_EQ(p->right->kind, rex::Kind::Char);
+  EXPECT_EQ(p->right->val, 'b');
+}
+
+TEST(Parser, AltFoldsLeft) {
+  rex::NodePtr p = rex::parse("a|b|c");
+  ASSERT_NE(p, nullptr);
+  EXPECT_EQ(p->kind, rex::Kind::Alt);
+  ASSERT_NE(p->left, nullptr);
+  EXPECT_EQ(p->left->kind, rex::Kind::Alt);
+  ASSERT_NE(p->right, nullptr);
+  EXPECT_EQ(p->right->val, 'c');
+}
+
+TEST(Parser, ConcatBindsTighterThanAlt) {
+  rex::NodePtr p = rex::parse("ab|c");
+  ASSERT_NE(p, nullptr);
+  EXPECT_EQ(p->kind, rex::Kind::Alt);
+  ASSERT_NE(p->left, nullptr);
+  EXPECT_EQ(p->left->kind, rex::Kind::Concat);
+  ASSERT_NE(p->right, nullptr);
+  EXPECT_EQ(p->right->kind, rex::Kind::Char);
+  EXPECT_EQ(p->right->val, 'c');
+}
+
+TEST(Parser, TrailingPipeFails) { EXPECT_EQ(rex::parse("a|"), nullptr); }
+
+TEST(Parser, LeadingPipeFails) { EXPECT_EQ(rex::parse("|a"), nullptr); }
+
 TEST(Parser, EmptyPatternFails) { EXPECT_EQ(rex::parse(""), nullptr); }
 
 TEST(Parser, LoneStarFails) { EXPECT_EQ(rex::parse("*"), nullptr); }
