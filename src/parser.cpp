@@ -27,13 +27,25 @@ static NodePtr atom(std::string_view& pattern) {
   return std::make_unique<Node>(Kind::Char, ch);
 }
 
+static NodePtr repeat(std::string_view& pattern) {
+  NodePtr ch = atom(pattern);
+  if (ch == nullptr) {
+    return nullptr;
+  }
+  if (!pattern.empty() && pattern.front() == '*') {
+    pattern.remove_prefix(1);
+    return std::make_unique<Node>(Kind::Star, 0, std::move(ch), nullptr);
+  }
+  return ch;
+}
+
 static NodePtr concat(std::string_view& pattern) {
-  NodePtr curr = atom(pattern);
+  NodePtr curr = repeat(pattern);
   if (curr == nullptr) {
     return nullptr;
   }
   while (starts_atom(pattern)) {
-    NodePtr ch = atom(pattern);
+    NodePtr ch = repeat(pattern);
     curr =
         std::make_unique<Node>(Kind::Concat, 0, std::move(curr), std::move(ch));
   }
