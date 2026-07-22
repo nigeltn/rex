@@ -12,11 +12,13 @@ static bool starts_atom(std::string_view pattern) {
     return false;
   }
   char ch = pattern.front();
-  if (ch == '|' || ch == '*' || ch == '(' || ch == ')') {
+  if (ch == '|' || ch == '*' || ch == ')') {
     return false;
   }
   return true;
 }
+
+static NodePtr alternation(std::string_view&);
 
 static NodePtr atom(std::string_view& pattern) {
   if (!starts_atom(pattern)) {
@@ -24,7 +26,18 @@ static NodePtr atom(std::string_view& pattern) {
   }
   char ch = pattern.front();
   pattern.remove_prefix(1);
-  return std::make_unique<Node>(Kind::Char, ch);
+  if (ch != '(') {
+    return std::make_unique<Node>(Kind::Char, ch);
+  }
+  NodePtr new_branch = alternation(pattern);
+  if (new_branch == nullptr) {
+    return nullptr;
+  }
+  if (pattern.empty() || (!pattern.empty() && pattern.front() != ')')) {
+    return nullptr;
+  }
+  pattern.remove_prefix(1);
+  return new_branch;
 }
 
 static NodePtr repeat(std::string_view& pattern) {
@@ -46,6 +59,9 @@ static NodePtr concat(std::string_view& pattern) {
   }
   while (starts_atom(pattern)) {
     NodePtr ch = repeat(pattern);
+    if (ch == nullptr) {
+      return nullptr;
+    }
     curr =
         std::make_unique<Node>(Kind::Concat, 0, std::move(curr), std::move(ch));
   }
