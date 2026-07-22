@@ -1,7 +1,8 @@
 #pragma once
-#include "rex/ast.hpp"
 #include <string_view>
 
+#include "rex/ast.hpp"
+
 namespace rex {
-    NodePtr parse(std::string_view);
+NodePtr parse(std::string_view);
 }
